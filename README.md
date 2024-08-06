@@ -3,10 +3,6 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 The goal of this project is to help calculate the cost of a meeting. It does so by calculating the length of the meeting * (sum of all hourly pays of attendees). The salary of employees can be difficult to obtain, unless you work for a state that share that information publicly. 
 
-## Reference Information
-
-Feel free to look in [salary-data](salary-data\README.md) to read more about where I'm getting salary information. For now, just sticking to the state of Georgia.
-
 
 # General Next.JS Stuff Below
 ## Getting Started
