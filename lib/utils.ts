@@ -63,6 +63,9 @@ export const getEmployeeSalary = (
   salaryDataset: Person[]
 ) => {
   const user = searchUser(employeeName, salaryDataset);
+  if (!user) {
+    return 0;
+  }
   return Number(user.base_salary);
 };
 
