@@ -4,42 +4,68 @@ import Link from "next/link";
 import { useCSVReader } from "react-papaparse";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { calculateMeetingCost, Person } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Attendee,
+  calculateMeetingCost,
+  cleanUserName,
+  parseMeetingDuration,
+  Person,
+} from "@/lib/utils";
 import { TrashIcon } from "lucide-react";
 
 export default function Home() {
   const { CSVReader } = useCSVReader();
   const [salaryData, setSalaryData] = useState<Person[]>([]);
-  const [attendee, setAttendee] = useState("");
-  const [attendees, setAttendees] = useState<string[]>([]);
-  const [meetingDuration, setMeetingDuration] = useState<number>(1);
+  const [attendees, setAttendees] = useState<Attendee[]>([]);
+  const [meetingDuration, setMeetingDuration] = useState<number>(0);
   const [meetingCost, setMeetingCost] = useState(0);
-  // Not needed yet
-  // const [meetingData, setMeetingData] = useState();
-  const myUsers = ["James Louis", "Kirby Smart"];
+  const [meetingTitle, setMeetingTitle] = useState("");
+  const [isShowingAttendees, setIsShowingAttendees] = useState(false);
 
-  const handleOnFormSubmit = (e: any) => {
-    e.preventDefault();
-
-    setAttendees([attendee, ...attendees]);
-    handleCalculate();
-  };
-
-  const removeAttendee = (attendeeName: string) => {
+  const removeAttendee = (attendeeName: Attendee) => {
     setAttendees(
       attendees.filter((innerAttendee) => {
-        return attendeeName != innerAttendee;
+        return attendeeName.email != innerAttendee.email;
       })
     );
     handleCalculate();
   };
 
   const handleCalculate = () => {
-    console.log(attendees);
     const cost = calculateMeetingCost(attendees, meetingDuration, salaryData);
-    setMeetingCost(Math.round((cost + Number.EPSILON) * 100) / 100);
+    const roundedCost = Math.round((cost + Number.EPSILON) * 100) / 100;
+    setMeetingCost(roundedCost);
+  };
+
+  const handleSetMeetingDuration = (meetingDuration: string) => {
+    const parsedMeetingDuration = parseMeetingDuration(meetingDuration);
+    setMeetingDuration(parsedMeetingDuration);
+  };
+
+  const parseAttendanceReport = (reportData: [string[]]) => {
+    reportData.forEach((line) => {
+      if (line[0] == "Meeting title") {
+        setMeetingTitle(line[1]);
+      }
+
+      if (line[0] == "Average attendance time") {
+        handleSetMeetingDuration(line[1]);
+      }
+    });
+
+    const attendeeTableStart = (line: string[]) =>
+      line[0] == "3. In-Meeting Activities";
+    const attendeeStart = reportData.findIndex(attendeeTableStart) + 2;
+    const attendees: Attendee[] = [];
+
+    reportData.slice(attendeeStart, -2).forEach((attendee: string[]) => {
+      attendees.push({
+        name: cleanUserName(attendee[0]),
+        email: attendee[4],
+      });
+    });
+    setAttendees(attendees);
+    handleCalculate();
   };
 
   return (
@@ -92,14 +118,11 @@ export default function Home() {
           </CSVReader>
         </div>
       </div>
-      {/* <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center">
         <div className="border rounded-lg p-4 m-2">
           <CSVReader
             onUploadAccepted={(results: any) => {
-              console.log("---------------------------");
-              console.log(results.data);
-              console.log("---------------------------");
-              setMeetingData(results);
+              parseAttendanceReport(results.data);
             }}
           >
             {({
@@ -123,14 +146,17 @@ export default function Home() {
                 </div>
                 <p>
                   For Microsoft365, you can use teams to export this report.
-                  </p>
-                  <ProgressBar />
-                  </>
-                  )}
-                  </CSVReader>
-                  </div>
-                  </div> */}
-      <div>
+                </p>
+                <p>Please make sure to open the report in Excel and save it.</p>
+                <p>This allows Excel to &quot;fix&quot; the report</p>
+                <ProgressBar />
+              </>
+            )}
+          </CSVReader>
+        </div>
+      </div>
+      {/* Temporarily remove option to manually input attendees */}
+      {/* <div>
         <Label htmlFor="employees">Add Employees To Meeting</Label>
         <div className="flex">
           <form onSubmit={handleOnFormSubmit}>
@@ -144,9 +170,22 @@ export default function Home() {
             <Button type="submit">Add</Button>
           </form>
         </div>
-      </div>
-      <div>
-        <Label htmlFor="meetinDuration">Meeting Duration in hours</Label>
+        </div> */}
+      {/* Remove this, but conditionally show meeting duration on report upload */}
+      {meetingDuration ? (
+        <div>
+          <p>Meeting Duration: {meetingDuration}</p>
+          {/* TODO: Auto calculate meeting cost */}
+          <Button onClick={() => handleCalculate()}>
+            Calculate Meeting Cost
+          </Button>
+          {meetingCost ? <p>This meeting costs: ${meetingCost}</p> : <></>}
+        </div>
+      ) : (
+        <></>
+      )}
+      {/* <div>
+        <Label htmlFor="meetingDuration">Meeting Duration in hours</Label>
         <Input
           id="meetingDuration"
           type="number"
@@ -155,29 +194,39 @@ export default function Home() {
             setMeetingDuration(Number(e.target.value));
           }}
         />
-      </div>
-      <div>
+      </div> */}
+      <div className="pt-2">
         {attendees.length > 0 ? (
           <div>
-            <h1 className="text-xl mt-10">Attendees</h1>
-            {attendees.map((innerAttendee, idx) => (
-              <div className="flex justify-between" key={idx}>
-                <p>{innerAttendee}</p>
-                <TrashIcon
-                  className="hover:cursor-pointer"
-                  onClick={() => {
-                    removeAttendee(innerAttendee);
-                  }}
-                />
+            <Button onClick={() => setIsShowingAttendees(!isShowingAttendees)}>
+              {isShowingAttendees ? "Hide" : "Show"} Attendees
+            </Button>
+            {isShowingAttendees ? (
+              <div>
+                <h1 className="text-xl mt-10">Attendees</h1>
+                {attendees.map((innerAttendee, idx) => (
+                  <div className="flex justify-between" key={idx}>
+                    <p>
+                      {innerAttendee.name.firstName}{" "}
+                      {innerAttendee.name.lastName}
+                    </p>
+                    <TrashIcon
+                      className="hover:cursor-pointer"
+                      onClick={() => {
+                        removeAttendee(innerAttendee);
+                      }}
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <></>
+            )}
           </div>
         ) : (
           <></>
         )}
       </div>
-      <Button onClick={handleCalculate}>Calculate Meeting Cost</Button>
-      {meetingCost ? <p>This meeting costs: ${meetingCost}</p> : <></>}
     </main>
   );
 }

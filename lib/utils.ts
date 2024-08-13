@@ -9,11 +9,30 @@ export interface Person {
   base_salary?: string;
 }
 
+export interface Attendee {
+  name: { firstName: string; lastName: string };
+  email: string;
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const cleanUserName = (name: string) => {
+export const parseMeetingDuration = (meetingDuration: string) => {
+  // Example input meeting duration: 1h 30m 10s
+  // Example expected output: 1.5
+  const hourSplit = meetingDuration.split("h");
+  const minSplit = hourSplit[1].split("m");
+  const hours = Number(hourSplit[0]);
+  const minutes = Number(minSplit[0]);
+
+  const num = hours + minutes / 60;
+  const roundedNum = Math.round((num + Number.EPSILON) * 100) / 100;
+
+  return roundedNum;
+};
+
+export const cleanUserName = (name: string) => {
   if (name.includes(",")) {
     return { firstName: name.split(", ")[1], lastName: name.split(", ")[0] };
   }
@@ -59,10 +78,10 @@ export const searchEmployees = (
 };
 
 export const getEmployeeSalary = (
-  employeeName: string,
+  attendeeName: string,
   salaryDataset: Person[]
 ) => {
-  const user = searchUser(employeeName, salaryDataset);
+  const user = searchUser(attendeeName, salaryDataset);
   if (!user) {
     return 0;
   }
@@ -92,36 +111,38 @@ export const calculateHourlyPay = (salary: number) => {
 };
 
 export const getEmployeeHourlyPay = (
-  employeeName: string,
+  attendeeName: Attendee["name"],
   salaryDataset: Person[]
 ) => {
-  const salary = getEmployeeSalary(employeeName, salaryDataset);
+  const salary = getEmployeeSalary(
+    `${attendeeName.firstName} ${attendeeName.lastName}`,
+    salaryDataset
+  );
   return calculateHourlyPay(salary);
 };
 
 export const getEmployeesHourlyPays = (
-  employees: string[],
+  attendees: Attendee[],
   salaryDataset: Person[]
 ) => {
-  const hourlyPays: number[] = employees.map((employee) => {
-    return getEmployeeHourlyPay(employee, salaryDataset);
+  const hourlyPays: number[] = attendees.map((attendee: Attendee) => {
+    return getEmployeeHourlyPay(attendee.name, salaryDataset);
   });
 
   return hourlyPays;
 };
 
 export const calculateMeetingCost = (
-  employees: string[],
-  meetingDuration: number, // TODO: Change this to a string and parse it, like 1h 2m 10s
+  attendees: Attendee[],
+  meetingDuration: number,
   salaryDataset: Person[]
 ) => {
   let sumOfHourlyPays = 0;
-  const hourlyPays = getEmployeesHourlyPays(employees, salaryDataset);
+  const hourlyPays = getEmployeesHourlyPays(attendees, salaryDataset);
   hourlyPays.forEach((pay) => {
     sumOfHourlyPays += pay;
   });
 
   const cost = meetingDuration * sumOfHourlyPays;
-  console.log(cost);
   return cost;
 };
