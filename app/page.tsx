@@ -53,17 +53,22 @@ export default function Home() {
       }
     });
 
-    const attendeeTableStart = (line: string[]) =>
+    const attendeesTableStart = (line: string[]) =>
+      line[0] == "2. Participants";
+    const attendeesTableEnd = (line: string[]) =>
       line[0] == "3. In-Meeting Activities";
-    const attendeeStart = reportData.findIndex(attendeeTableStart) + 2;
+
+    const attendeesStart = reportData.findIndex(attendeesTableStart) + 2;
+    const attendeesEnd = reportData.findIndex(attendeesTableEnd) - 1;
     const attendees: Attendee[] = [];
 
-    reportData.slice(attendeeStart, -2).forEach((attendee: string[]) => {
+    reportData.slice(attendeesStart, attendeesEnd).forEach((attendee: string[]) => {
       attendees.push({
         name: cleanUserName(attendee[0]),
         email: attendee[4],
       });
     });
+    
     setAttendees(attendees);
     handleCalculate();
   };
