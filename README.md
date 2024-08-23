@@ -7,6 +7,14 @@ The goal of this project is to help calculate the cost of a meeting. It does so 
 # General Next.JS Stuff Below
 ## Getting Started
 
+
+You can use [Devbox](https://www.jetify.com/devbox). Go to their site to learn how to install.
+
+After installing Devbox, to get a development envirtonment you just have to run:
+```bash
+devbox run dev
+```
+
 First, install the dependencies:
 ```bash
 npm install
