@@ -1,8 +1,16 @@
 import { useCSVReader } from "react-papaparse";
 import { Button } from "@/components/ui/button";
 import { Attendee } from "@/lib/utils";
-import { TrashIcon } from "lucide-react";
 import { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export function AttendanceReportUpload({
   parseAttendanceReport,
@@ -55,6 +63,8 @@ export function AttendeeTable({
   setAttendees: Function;
 }) {
   const [isShowingAttendees, setIsShowingAttendees] = useState(false);
+
+  // TODO: Implement removing of attendees
   const removeAttendee = (attendeeName: Attendee) => {
     setAttendees(
       attendees.filter((innerAttendee) => {
@@ -65,32 +75,31 @@ export function AttendeeTable({
 
   return (
     <div className="pt-2">
-      {attendees.length > 0 ? (
-        <div>
-          <Button onClick={() => setIsShowingAttendees(!isShowingAttendees)}>
-            {isShowingAttendees ? "Hide" : "Show"} Attendees
-          </Button>
-          {isShowingAttendees ? (
-            <div>
-              <h1 className="text-xl mt-10">Attendees</h1>
-              {attendees.map((innerAttendee, idx) => (
-                <div className="flex justify-between" key={idx}>
-                  <p>
-                    {innerAttendee.name.firstName} {innerAttendee.name.lastName}
-                  </p>
-                  <TrashIcon
-                    className="hover:cursor-pointer"
-                    onClick={() => {
-                      removeAttendee(innerAttendee);
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <></>
-          )}
-        </div>
+      <Button onClick={() => setIsShowingAttendees(!isShowingAttendees)}>
+        {isShowingAttendees ? "Hide" : "Show"} Attendees
+      </Button>
+      {isShowingAttendees ? (
+        <Table>
+          <TableCaption>Attendees</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Name</TableHead>
+              <TableHead>Email</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {attendees.map((attendee, idx) => {
+              return (
+                <TableRow key={idx}>
+                  <TableCell>
+                    {attendee.name.firstName} {attendee.name.lastName}
+                  </TableCell>
+                  <TableCell>{attendee.email}</TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       ) : (
         <></>
       )}

@@ -86,7 +86,11 @@ export default function Home() {
       ) : (
         <></>
       )}
-      <AttendeeTable attendees={attendees} setAttendees={setAttendees} />
+      {attendees.length > 0 ? (
+        <AttendeeTable attendees={attendees} setAttendees={setAttendees} />
+      ) : (
+        <></>
+      )}
     </main>
   );
 }
