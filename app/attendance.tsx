@@ -12,6 +12,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
+
 export function AttendanceReportUpload({
   parseAttendanceReport,
 }: {
@@ -75,34 +87,42 @@ export function AttendeeTable({
 
   return (
     <div className="pt-2">
-      <Button onClick={() => setIsShowingAttendees(!isShowingAttendees)}>
-        {isShowingAttendees ? "Hide" : "Show"} Attendees
-      </Button>
-      {isShowingAttendees ? (
-        <Table>
-          <TableCaption>Attendees</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Name</TableHead>
-              <TableHead>Email</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {attendees.map((attendee, idx) => {
-              return (
-                <TableRow key={idx}>
-                  <TableCell>
-                    {attendee.name.firstName} {attendee.name.lastName}
-                  </TableCell>
-                  <TableCell>{attendee.email}</TableCell>
+      <Drawer>
+        <DrawerTrigger asChild>
+          <Button variant="outline">See Attendees</Button>
+        </DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader>Meeting Attendees</DrawerHeader>
+          <ScrollArea className="flex h-[200px] border p-4">
+            <Table>
+              <TableCaption>Attendees</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">Name</TableHead>
+                  <TableHead>Email</TableHead>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      ) : (
-        <></>
-      )}
+              </TableHeader>
+              <TableBody>
+                {attendees.map((attendee, idx) => {
+                  return (
+                    <TableRow key={idx}>
+                      <TableCell>
+                        {attendee.name.firstName} {attendee.name.lastName}
+                      </TableCell>
+                      <TableCell>{attendee.email}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+          <DrawerFooter>
+            <DrawerClose asChild>
+              <Button variant="outline">Close</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
