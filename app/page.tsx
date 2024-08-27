@@ -9,8 +9,8 @@ import {
   parseMeetingDuration,
   Person,
 } from "@/lib/utils";
-import SalaryUpload from "@/app/salary";
-import { AttendanceReportUpload, AttendeeTable } from "./attendance";
+import SalaryUpload from "@/app/components/salary";
+import { AttendanceReportUpload, AttendeeTable } from "@/app/components/attendance";
 
 export default function Home() {
   const [salaryData, setSalaryData] = useState<Person[]>([]);
