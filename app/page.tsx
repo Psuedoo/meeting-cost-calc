@@ -10,7 +10,10 @@ import {
   Person,
 } from "@/lib/utils";
 import SalaryUpload from "@/app/components/salary";
-import { AttendanceReportUpload, AttendeeTable } from "@/app/components/attendance";
+import {
+  AttendanceReportUpload,
+  AttendeeTable,
+} from "@/app/components/attendance";
 
 export default function Home() {
   const [salaryData, setSalaryData] = useState<Person[]>([]);
@@ -86,7 +89,11 @@ export default function Home() {
       ) : (
         <></>
       )}
-      <AttendeeTable attendees={attendees} setAttendees={setAttendees} />
+      {attendees.length > 0 ? (
+        <AttendeeTable attendees={attendees} setAttendees={setAttendees} />
+      ) : (
+        <></>
+      )}
     </main>
   );
 }
